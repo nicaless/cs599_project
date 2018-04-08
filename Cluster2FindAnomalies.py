@@ -11,13 +11,16 @@ import glob
 import os
 import numpy as np
 import cv2
+import sys
+
+vid_name = sys.argv[1]
 
 
 # In[182]:
 
 # Velocity Trace - Fast Cars
 
-for f in glob.glob('projections/*.csv'):
+for f in glob.glob('projections/' + vid_name + '*.csv'):
     # Get Video ID
     vid_id =  f.split("projections/")[1].split("_")[0]
     # Read in Data
