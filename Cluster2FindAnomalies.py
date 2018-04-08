@@ -75,7 +75,7 @@ for f in glob.glob('projections/' + vid_name + '*.csv'):
         image_name = vid_id + "/" + str(i) + '.png'
         img = cv2.imread(image_name)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        anomaly_cars_in_frame = anomaly_obj_data[anomaly_obj_data['frame'] == i + 8849]
+        anomaly_cars_in_frame = anomaly_obj_data[anomaly_obj_data['frame'] == i]
         for index, row in anomaly_cars_in_frame.iterrows():
             x1 = row['x']
             y1 = row['y']
