@@ -3,6 +3,8 @@
 
 # In[155]:
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 import scipy.cluster.hierarchy as hcluster
@@ -20,7 +22,7 @@ vid_name = sys.argv[1]
 
 # Velocity Trace - Fast Cars
 
-for f in glob.glob('projections/' + vid_name + '*.csv'):
+for f in glob.glob('projections/' + vid_name + '_*.csv'):
     # Get Video ID
     vid_id =  f.split("projections/")[1].split("_")[0]
     # Read in Data
@@ -63,19 +65,20 @@ for f in glob.glob('projections/' + vid_name + '*.csv'):
     # Get Object IDs
     anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
     # Get X, Y, Height, Length, and Frame IDs
-    anomaly_obj_data = pd.read_csv("data/" + vid_id + data_group_name, header=None)
+    anomaly_obj_data = pd.read_csv("data/" + str(vid_id) + data_group_name, header=None)
     anomaly_obj_data.columns = data_cols
     anomaly_obj_data = anomaly_obj_data[['obj', 'x', 'y', 'height', 'width', 'frame']]
     anomaly_obj_data = anomaly_obj_data[anomaly_obj_data['obj'].isin(anomaly_objs)]
     # Save File with Object ID, X, Y, Height, Length, Frame IDs
-    anomaly_obj_data.to_csv("anomalies/" + vid_id + save_name + ".csv")
+    anomaly_obj_data.to_csv("anomalies/" + str(vid_id) + save_name + ".csv")
     # Draws Bounding Boxes
     frames = anomaly_obj_data['frame'].unique()
     for i in frames: 
-        image_name = vid_id + "/" + str(i) + '.png'
+        image_name = str(vid_id) + "/" + str(i) + '.png'
+	print image_name
         img = cv2.imread(image_name)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        anomaly_cars_in_frame = anomaly_obj_data[anomaly_obj_data['frame'] == i]
+        anomaly_cars_in_frame = anomaly_obj_data[anomaly_obj_data['frame'] == int(i)]
         for index, row in anomaly_cars_in_frame.iterrows():
             x1 = row['x']
             y1 = row['y']
