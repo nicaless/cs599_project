@@ -8,6 +8,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy
 import scipy.cluster.hierarchy as hcluster
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
 import glob
 import os
