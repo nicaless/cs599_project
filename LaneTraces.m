@@ -1,6 +1,7 @@
 data_folder = 'data/';
 data_type = '_withLanes.csv';
-vids = [2 25 33 39 49 72 74];
+%vids = [2 25 33 39 49 72 74];
+vids = [2];
 
 for i = vids
     filename = strcat(data_folder, num2str(i), data_type);
@@ -30,8 +31,8 @@ for i = vids
             %%% Car Moves Into Shoulder at some point
             spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == lane_val) and ev_[0, tau] (alw_[0, w] (lane[t] == shoulder_val))) ');
             spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
-            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, times(end) ; 0, times(end)]);
-            P.solver_options.monotony = [1, 1];
+            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
+            P.solver_options.monotony = [-1, 1];
             c = P.solve();
             w = c(1);
             tau = c(2);
@@ -40,8 +41,8 @@ for i = vids
             %%% Car Starts in Shoulder and Moves into Lane
             spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == shoulder_val) and ev_[0, tau] (alw_[0, w] (lane[t] == lane_val))) ');
             spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
-            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, times(end) ; 0, times(end)]);
-            P.solver_options.monotony = [1, 1];
+            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
+            P.solver_options.monotony = [-1, 1];
             c = P.solve();
             w = c(1);
             tau = c(2);

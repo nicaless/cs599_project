@@ -48,13 +48,14 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "to_shoulder" in f or "to_lane" in f:
         data.columns = ["Vid", "Object", "w", "tau"]
-        data['C'] = data['w'] - data['tau']
-        c = data['C'].values #returns a numpy array
-        c = c.reshape(-1, 1)
-        scaler = StandardScaler()
-        c_scaled = scaler.fit_transform(c)
-        data['C'] = c_scaled
-        cluster_var = ['C']
+#        data['C'] = data['w'] - data['tau']
+#        c = data['C'].values #returns a numpy array
+#        c = c.reshape(-1, 1)
+#        scaler = StandardScaler()
+#        c_scaled = scaler.fit_transform(c)
+#        data['C'] = c_scaled
+#        cluster_var = ['C']
+        cluster_var = ['w', 'tau']
         save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
         data_group_name = "_withLanes.csv"
         data_cols = ['height', 'width', 'y','x','cog_y','cog_x', 'obj', 'frame', 'lane']
@@ -62,7 +63,7 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         continue
     # Cluster
     X = np.asarray(data[cluster_var]).reshape((len(data[cluster_var[0]]), len(cluster_var)))
-    clusters = hcluster.fclusterdata(X, 1.0, criterion="distance")
+    clusters = hcluster.fclusterdata(X, 1.5, criterion="distance")
     # Save Cluster Plot and Cluster Results
     data_results = data
     data_results['Cluster'] = clusters 
@@ -71,16 +72,28 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         plt.xlabel('t')
         plt.ylabel('C')
     else:
-        plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
-        plt.xlabel('C1')
-        plt.ylabel('C2')
+        if data_group_name == "_withVelocity.csv":
+            plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
+            plt.xlabel('C1')
+            plt.ylabel('C2')
+        else:
+            plt.scatter(data['w'].values, data['tau'].values, c=clusters)
+            #plt.scatter(data['C1'].values, data['C2'].values)
+            plt.xlabel('w')
+            plt.ylabel('tau')
+#        plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
+#        plt.xlabel('C1')
+#        plt.ylabel('C2')
     plt.savefig("cluster_plots/" + vid_id + save_name + ".png")
     # Find Smallest Cluster
     data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
     data_group['Cluster'] = data_group.index
-    smallest_cluster = data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]
+#    smallest_cluster = data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]
+    avg_cluster_size = data_group[('Object', 'count')].mean()
+    smallest_cluster = data_group[data_group[('Object', 'count')] < avg_cluster_size]['Cluster'].values
     # Get Object IDs
-    anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
+#    anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
+    anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
     # Get X, Y, Height, Length, and Frame IDs
     anomaly_obj_data = pd.read_csv("data/" + str(vid_id) + data_group_name, header=None)
     anomaly_obj_data.columns = data_cols
