@@ -29,19 +29,19 @@ for i = vids
         
         S = BreachTraceSystem({'v'},[times', velocity]);
         
-        %%% Cars Moving Faster than average (find high c)
-        spec1 = STL_Formula('mu', 'ev_[t0,T] ((v[t] - avg_v) > c)');
-        spec1 = set_params(spec1, {'t0', 'T', 'avg_v'}, [times(1) times(end) avg_velocity]);
-        P = ParamSynthProblem(S, spec1, {'c'}, [-50, 50]);
-        c = P.solve();
-        fast_cars_spec_output = [fast_cars_spec_output; [i, car, c]];
-        
         %%% Cars Moving Slower than average (find high c)
         spec2 = STL_Formula('mu', 'ev_[t0,T] ((avg_v - v[t]) > c)');
         spec2 = set_params(spec2, {'t0', 'T', 'avg_v'}, [times(1) times(end) avg_velocity]);
         P = ParamSynthProblem(S, spec2, {'c'}, [-50, 50]);
         c = P.solve();
         slow_cars_spec_output = [slow_cars_spec_output; [i, car, c]];
+        
+        %%% Cars Moving Faster than average (find high c)
+        spec1 = STL_Formula('mu', 'ev_[t0,T] ((v[t] - avg_v) > c)');
+        spec1 = set_params(spec1, {'t0', 'T', 'avg_v'}, [times(1) times(end) avg_velocity]);
+        P = ParamSynthProblem(S, spec1, {'c'}, [-50, 50]);
+        c = P.solve();
+        fast_cars_spec_output = [fast_cars_spec_output; [i, car, c]];
         
         %%% Maintain Velocity
         spec3 = STL_Formula('phi', 'ev_[t0,T] ((v[t] > c1) and ev_[0,1.5] (v[t] < c2))');

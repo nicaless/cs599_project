@@ -45,18 +45,34 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         save_name = "_maintain_velocity"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
+    elif "to_shoulder" in f or "to_lane" in f:
+        data.columns = ["Vid", "Object", "w", "tau"]
+        data['C'] = data['w'] - data['tau']
+        c = data['C'].values #returns a numpy array
+        c = c.reshape(-1, 1)
+        scaler = StandardScaler()
+        c_scaled = scaler.fit_transform(c)
+        data['C'] = c_scaled
+        cluster_var = ['C']
+        save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
+        data_group_name = "_withLanes.csv"
+        data_cols = ['height', 'width', 'y','x','cog_y','cog_x', 'obj', 'frame', 'lane']
     else:
         continue
     # Cluster
     X = np.asarray(data[cluster_var]).reshape((len(data[cluster_var[0]]), len(cluster_var)))
-    clusters = hcluster.fclusterdata(X, 1.5, criterion="distance")
+    clusters = hcluster.fclusterdata(X, 1.0, criterion="distance")
     # Save Cluster Plot and Cluster Results
     data_results = data
     data_results['Cluster'] = clusters 
     if len(cluster_var) == 1:
         plt.scatter(range(0, len(data['C'])) ,data['C'].values, c=clusters)
+        plt.xlabel('t')
+        plt.ylabel('C')
     else:
         plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
+        plt.xlabel('C1')
+        plt.ylabel('C2')
     plt.savefig("cluster_plots/" + vid_id + save_name + ".png")
     # Find Smallest Cluster
     data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
