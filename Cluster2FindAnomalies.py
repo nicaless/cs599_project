@@ -90,7 +90,8 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     data_group['Cluster'] = data_group.index
 #    smallest_cluster = data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]
     avg_cluster_size = data_group[('Object', 'count')].mean()
-    smallest_cluster = data_group[data_group[('Object', 'count')] < avg_cluster_size]['Cluster'].values
+    std_cluster_size = data_group[('Object', 'count')].std()
+    smallest_cluster = data_group[data_group[('Object', 'count')] < abs(avg_cluster_size - (std_cluster_size/2.0))]['Cluster'].values
     # Get Object IDs
 #    anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
     anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
