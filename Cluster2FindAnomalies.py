@@ -88,10 +88,15 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     # Find Smallest Cluster
     data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
     data_group['Cluster'] = data_group.index
-#    smallest_cluster = data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]
-    avg_cluster_size = data_group[('Object', 'count')].mean()
-    std_cluster_size = data_group[('Object', 'count')].std()
-    smallest_cluster = data_group[data_group[('Object', 'count')] < abs(avg_cluster_size - (std_cluster_size/2.0))]['Cluster'].values
+
+    # Find Smallest Cluster if Velocity
+    if data_group_name == "_withVelocity.csv":
+        smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
+    else:
+        # Find Smaller than Average Clusters if Lane
+        avg_cluster_size = data_group[('Object', 'count')].mean()
+        std_cluster_size = data_group[('Object', 'count')].std()
+        smallest_cluster = data_group[data_group[('Object', 'count')] < abs(avg_cluster_size - (std_cluster_size/2.0))]['Cluster'].values
     # Get Object IDs
 #    anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
     anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
