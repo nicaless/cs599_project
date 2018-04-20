@@ -59,6 +59,12 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
         data_group_name = "_withLanes.csv"
         data_cols = ['height', 'width', 'y','x','cog_y','cog_x', 'obj', 'frame', 'lane']
+    elif "in_lane" in f:
+        data.columns = ["Vid", "Object", "tau"]
+        cluster_var = ['tau']
+        save_name = "_in_lane"
+        data_group_name = "_withLanes.csv"
+        data_cols = ['height', 'width', 'y','x','cog_y','cog_x', 'obj', 'frame', 'lane']
     else:
         continue
     # Cluster
@@ -68,9 +74,14 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     data_results = data
     data_results['Cluster'] = clusters 
     if len(cluster_var) == 1:
-        plt.scatter(range(0, len(data['C'])) ,data['C'].values, c=clusters)
-        plt.xlabel('t')
-        plt.ylabel('C')
+        if save_name == "_in_lane":
+            plt.scatter(range(0, len(data['tau'])) ,data['tau'].values, c=clusters)
+            plt.xlabel('t')
+            plt.ylabel('tau')
+        else:
+            plt.scatter(range(0, len(data['C'])) ,data['C'].values, c=clusters)
+            plt.xlabel('t')
+            plt.ylabel('C')
     else:
         if data_group_name == "_withVelocity.csv":
             plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
@@ -78,19 +89,15 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
             plt.ylabel('C2')
         else:
             plt.scatter(data['w'].values, data['tau'].values, c=clusters)
-            #plt.scatter(data['C1'].values, data['C2'].values)
             plt.xlabel('w')
             plt.ylabel('tau')
-#        plt.scatter(data['C1'].values, data['C2'].values, c=clusters)
-#        plt.xlabel('C1')
-#        plt.ylabel('C2')
     plt.savefig("cluster_plots/" + vid_id + save_name + ".png")
     # Find Smallest Cluster
     data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
     data_group['Cluster'] = data_group.index
 
     # Find Smallest Cluster if Velocity
-    if data_group_name == "_withVelocity.csv":
+    if data_group_name == "_withVelocity.csv" or save_name == "_in_lane":
         smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
     else:
         # Find Smaller than Average Clusters if Lane

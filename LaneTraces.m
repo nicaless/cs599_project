@@ -11,6 +11,7 @@ for i = vids
     
     shoulder_spec_output = [];
     lane_spec_output = [];
+    lane_output = [];
     unique_objects = unique(cars(:,7));
     
     for car = unique_objects'
@@ -28,31 +29,40 @@ for i = vids
         if any(lane(:) == 0)
             S = BreachTraceSystem({'lane'},[times', lane]);
 
-            %%% Car Moves Into Shoulder at some point
-            spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == lane_val) and ev_[0, tau] (alw_[0, w] (lane[t] == shoulder_val))) ');
-            spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
-            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
-            P.solver_options.monotony = [-1, 1];
+%             %%% Car Moves Into Shoulder at some point
+%             spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == lane_val) and ev_[0, tau] (alw_[0, w] (lane[t] == shoulder_val))) ');
+%             spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
+%             P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
+%             P.solver_options.monotony = [-1, 1];
+%             c = P.solve();
+%             w = c(1);
+%             tau = c(2);
+%             shoulder_spec_output = [shoulder_spec_output; [i, car, w, tau]];
+% 
+%             %%% Car Starts in Shoulder and Moves into Lane
+%             spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == shoulder_val) and ev_[0, tau] (alw_[0, w] (lane[t] == lane_val))) ');
+%             spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
+%             P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
+%             P.solver_options.monotony = [-1, 1];
+%             c = P.solve();
+%             w = c(1);
+%             tau = c(2);
+%             lane_spec_output = [lane_spec_output; [i, car, w, tau]];
+            
+            %%% Car in Shoulder at any point
+            spec = STL_Formula('mu', 'ev_[0, tau] lane[t] == shoulder_val');
+            spec = set_params(spec, {'shoulder_val'}, shoulder_val);
+            P = ParamSynthProblem(S, spec, {'tau'}, [0, 90]);
+            P.solver_options.monotony = 1;
             c = P.solve();
-            w = c(1);
-            tau = c(2);
-            shoulder_spec_output = [shoulder_spec_output; [i, car, w, tau]];
-
-            %%% Car Starts in Shoulder and Moves into Lane
-            spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == shoulder_val) and ev_[0, tau] (alw_[0, w] (lane[t] == lane_val))) ');
-            spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
-            P = ParamSynthProblem(S, spec, {'w', 'tau'}, [0, 30 ; 0, 60]);
-            P.solver_options.monotony = [-1, 1];
-            c = P.solve();
-            w = c(1);
-            tau = c(2);
-            lane_spec_output = [lane_spec_output; [i, car, w, tau]];
+            lane_output = [lane_output; [i, car, c(1)]];
         end
         
     end
     
-    csvwrite(strcat(num2str(i), "_to_shoulder.csv"), shoulder_spec_output)
-    csvwrite(strcat(num2str(i), "_to_lane.csv"), lane_spec_output)
+%     csvwrite(strcat(num2str(i), "_to_shoulder.csv"), shoulder_spec_output)
+%     csvwrite(strcat(num2str(i), "_to_lane.csv"), lane_spec_output)
+    csvwrite(strcat(num2str(i), "_in_lane.csv"), lane_output)
          
 end
     
