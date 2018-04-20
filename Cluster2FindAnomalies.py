@@ -48,13 +48,6 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "to_shoulder" in f or "to_lane" in f:
         data.columns = ["Vid", "Object", "w", "tau"]
-#        data['C'] = data['w'] - data['tau']
-#        c = data['C'].values #returns a numpy array
-#        c = c.reshape(-1, 1)
-#        scaler = StandardScaler()
-#        c_scaled = scaler.fit_transform(c)
-#        data['C'] = c_scaled
-#        cluster_var = ['C']
         cluster_var = ['w', 'tau']
         save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
         data_group_name = "_withLanes.csv"
@@ -97,16 +90,20 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     data_group['Cluster'] = data_group.index
 
     # Find Smallest Cluster if Velocity
-    if data_group_name == "_withVelocity.csv" or save_name == "_in_lane":
+    if data_group_name == "_withVelocity.csv":
         smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
+        # Get Object IDs
+        anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
+    elif save_name == "_in_lane":
+        # Get Object IDs
+        anomaly_objs = data['Object'][data['tau'] > 0]
     else:
         # Find Smaller than Average Clusters if Lane
         avg_cluster_size = data_group[('Object', 'count')].mean()
         std_cluster_size = data_group[('Object', 'count')].std()
         smallest_cluster = data_group[data_group[('Object', 'count')] < abs(avg_cluster_size - (std_cluster_size/2.0))]['Cluster'].values
-    # Get Object IDs
-#    anomaly_objs = data['Object'][data['Cluster'] == smallest_cluster]
-    anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
+        # Get Object IDs
+        anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
     # Get X, Y, Height, Length, and Frame IDs
     anomaly_obj_data = pd.read_csv("data/" + str(vid_id) + data_group_name, header=None)
     anomaly_obj_data.columns = data_cols
