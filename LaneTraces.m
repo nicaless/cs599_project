@@ -53,7 +53,7 @@ for i = vids
             spec = STL_Formula('mu', 'ev_[0, tau] lane[t] == shoulder_val');
             spec = set_params(spec, {'shoulder_val'}, shoulder_val);
             P = ParamSynthProblem(S, spec, {'tau'}, [0, 90]);
-            P.solver_options.monotony = 1;
+            P.solver_options.monotony = -1;
             c = P.solve();
             lane_output = [lane_output; [i, car, c(1)]];
         end

@@ -96,7 +96,9 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
     elif save_name == "_in_lane":
         # Get Object IDs
-        anomaly_objs = data['Object'][data['tau'] > 0]
+#        anomaly_objs = data['Object'][data['tau'] > 0]
+        avg_tau = data['tau'].mean()
+        anomaly_objs = data['Object'][data['tau'] > avg_tau]
     else:
         # Find Smaller than Average Clusters if Lane
         avg_cluster_size = data_group[('Object', 'count')].mean()
