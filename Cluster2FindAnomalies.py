@@ -29,24 +29,28 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     # Read in Data
     data = pd.read_csv(f, header=None)
     if "fast_cars" in f:
+	continue
         data.columns = ["Vid", "Object", "C"]
         cluster_var = ['C']
         save_name = "_fast_cars"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "slow_cars" in f:
+	continue
         data.columns = ["Vid", "Object", "C"]
         cluster_var = ['C']
         save_name = "_slow_cars"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "maintain_velocity" in f:
+	continue
         data.columns = ["Vid", "Object", "C1", "C2"]
         cluster_var = ['C1', 'C2']
         save_name = "_maintain_velocity"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "to_shoulder" in f or "to_lane" in f:
+	continue
         data.columns = ["Vid", "Object", "w", "tau"]
         cluster_var = ['w', 'tau']
         save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
@@ -128,7 +132,7 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
             h = row['height']
             w = row['width']
             cv2.rectangle(img, (int(x1), int(y1)), (int(x1 + w), int(y1 + h)), (0, 0, 255), 3)
-        labeled_image_name = "anomaly_pics/" + vid_id + "_" + str(i) + save_name + ".png"
+        labeled_image_name = "anomaly_pics_lane/" + vid_id + "_" + str(i) + save_name + ".png"
         cv2.imwrite(labeled_image_name, img)
     
 
