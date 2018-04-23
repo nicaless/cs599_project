@@ -140,7 +140,7 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
             h = row['height']
             w = row['width']
             cv2.rectangle(img, (int(x1), int(y1)), (int(x1 + w), int(y1 + h)), (0, 0, 255), 3)
-        labeled_image_name = "anomaly_pics_lane/" + vid_id + "_" + str(i) + save_name + ".png"
+        labeled_image_name = "anomaly_pics_mv/" + vid_id + "_" + str(i) + save_name + ".png"
         cv2.imwrite(labeled_image_name, img)
     
 
