@@ -56,6 +56,7 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         data_group_name = "_withLanes.csv"
         data_cols = ['height', 'width', 'y','x','cog_y','cog_x', 'obj', 'frame', 'lane']
     elif "in_lane" in f:
+	continue
         data.columns = ["Vid", "Object", "tau"]
         cluster_var = ['tau']
         save_name = "_in_lane"
