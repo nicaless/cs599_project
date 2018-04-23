@@ -5,6 +5,7 @@
 
 import matplotlib
 matplotlib.use('Agg')
+import math
 import matplotlib.pyplot as plt
 import numpy
 import scipy.cluster.hierarchy as hcluster
