@@ -98,7 +98,7 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     data_group['Cluster'] = data_group.index
 
     # Find Smallest Cluster if Velocity
-    if data_group_name == "_withVelocity.csv":
+    if data_group_name == "_withVelocity.csv" and save_name != "_maintain_velocity":
         smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
         # Get Object IDs
         anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
