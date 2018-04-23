@@ -1,7 +1,7 @@
 data_folder = 'data/';
 data_type = '_withLanes.csv';
 %vids = [2 25 33 39 49 72 74];
-vids = [33];
+vids = [33 72];
 
 for i = vids
     filename = strcat(data_folder, num2str(i), data_type);
@@ -50,16 +50,23 @@ for i = vids
 %             lane_spec_output = [lane_spec_output; [i, car, w, tau]];
             
             %%% Car in Shoulder at any point
-            spec = STL_Formula('mu', 'ev_[0, tau] lane[t] == shoulder_val');
-            spec = set_params(spec, {'shoulder_val'}, shoulder_val);
+%             spec = STL_Formula('mu', 'ev_[0, tau] lane[t] == shoulder_val');
+%             spec = set_params(spec, {'shoulder_val'}, shoulder_val);
+%             P = ParamSynthProblem(S, spec, {'tau'}, [0, 90]);
+%             P.solver_options.monotony = -1;
+%             c = P.solve();
+%             lane_output = [lane_output; [i, car, c(1)]];
+
+            spec = STL_Formula('phi', 'ev_[t0,T] ((lane[t] == shoulder_val) until_[tau, T] (lane[t] == lane_val))');
+            spec = set_params(spec, {'t0', 'T', 'shoulder_val', 'lane_val'}, [times(1) times(end) shoulder_val lane_val]);
             P = ParamSynthProblem(S, spec, {'tau'}, [0, 90]);
             P.solver_options.monotony = -1;
             c = P.solve();
-            lane_output = [lane_output; [i, car, c(1)]];
+            tau = c(1);
+            lane_output = [lane_output; [i, car, tau]];
         end
         
     end
-    
 %     csvwrite(strcat(num2str(i), "_to_shoulder.csv"), shoulder_spec_output)
 %     csvwrite(strcat(num2str(i), "_to_lane.csv"), lane_spec_output)
     csvwrite(strcat(num2str(i), "_in_lane.csv"), lane_output)

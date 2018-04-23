@@ -29,28 +29,27 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
     # Read in Data
     data = pd.read_csv(f, header=None)
     if "fast_cars" in f:
-	continue
+        continue
         data.columns = ["Vid", "Object", "C"]
         cluster_var = ['C']
         save_name = "_fast_cars"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "slow_cars" in f:
-	continue
+        continue
         data.columns = ["Vid", "Object", "C"]
         cluster_var = ['C']
         save_name = "_slow_cars"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "maintain_velocity" in f:
-	continue
         data.columns = ["Vid", "Object", "C1", "C2"]
         cluster_var = ['C1', 'C2']
         save_name = "_maintain_velocity"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
     elif "to_shoulder" in f or "to_lane" in f:
-	continue
+        continue
         data.columns = ["Vid", "Object", "w", "tau"]
         cluster_var = ['w', 'tau']
         save_name = "_to_shoulder" if "to_shoulder" in f else "to_lane"
@@ -104,6 +103,15 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         avg_tau = data['tau'].mean()
         avg_std = data['tau'].std()
         anomaly_objs = data['Object'][data['tau'] > (avg_tau + avg_std/2.0)]
+    elif save_name == "_maintain_velocity":
+        avg_c1 = data['C1'].mean()
+        avg_c2 = data['C2'].mean()
+        data = data[(data['C1'] > avg_c1) & data['C2'] > avg_c2]
+        data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
+        data_group['Cluster'] = data_group.index
+        smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
+        # Get Object IDs
+        anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
     else:
         # Find Smaller than Average Clusters if Lane
         avg_cluster_size = data_group[('Object', 'count')].mean()
