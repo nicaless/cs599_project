@@ -48,6 +48,10 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         save_name = "_maintain_velocity"
         data_group_name = "_withVelocity.csv"
         data_cols = ['cog_x','cog_y','frame','height','obj','velocity','width','x','y']
+
+        avg_c1 = data['C1'].mean()
+        avg_c2 = data['C2'].mean()
+        data = data[(data['C1'] > 30) & (data['C2'] < 30)]
     elif "to_shoulder" in f or "to_lane" in f:
         continue
         data.columns = ["Vid", "Object", "w", "tau"]
@@ -105,12 +109,14 @@ for f in glob.glob('projections/' + vid_name + '_*.csv'):
         avg_std = data['tau'].std()
         anomaly_objs = data['Object'][data['tau'] > (avg_tau + avg_std/2.0)]
     elif save_name == "_maintain_velocity":
-        avg_c1 = data['C1'].mean()
-        avg_c2 = data['C2'].mean()
-        data = data[(data['C1'] > avg_c1) & data['C2'] > avg_c2]
+#        avg_c1 = data['C1'].mean()
+#        avg_c2 = data['C2'].mean()
+#        data = data[(data['C1'] > avg_c1) & data['C2'] > avg_c2]
         data_group = data[['Object', 'Cluster']].groupby(['Cluster']).agg(['count'])
         data_group['Cluster'] = data_group.index
-        smallest_cluster = [data_group.sort_values([('Object', 'count')])['Cluster'].iloc[0]]
+        avg_cluster_size = data_group[('Object', 'count')].mean()
+        std_cluster_size = data_group[('Object', 'count')].std()
+        smallest_cluster = data_group[data_group[('Object', 'count')] < math.ceil(avg_cluster_size/2.0)]['Cluster'].values
         # Get Object IDs
         anomaly_objs = data['Object'][data['Cluster'].isin(smallest_cluster)]
     else:
