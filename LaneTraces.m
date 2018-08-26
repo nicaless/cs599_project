@@ -1,7 +1,7 @@
 data_folder = 'data/';
 data_type = '_withLanes.csv';
 %vids = [2 25 33 39 49 72 74];
-vids = [33 72];
+vids = [72];
 
 for i = vids
     filename = strcat(data_folder, num2str(i), data_type);
